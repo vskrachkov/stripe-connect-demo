@@ -1,0 +1,8 @@
+{
+    "create-account-link-response": {
+        "object": "account_link",
+        "created": 1647015206,
+        "expires_at": 1647015506,
+        "url": "https://connect.stripe.com/setup/s/UyHia1GJtP8P"
+    }
+}
