@@ -9,8 +9,10 @@ stripe.api_key = "sk_test_51KbRgOEsCAzyWueJREvb2cu4pVmHJ2m0JXNtpm8m4IxkOfcX18wOm
 
 
 @app.get("/", response_class=HTMLResponse, name="index-page")
-def read_root() -> str:
-    create_account_url = app.url_path_for("create-account")
+def index() -> str:
+    create_standard_account_url = app.url_path_for(
+        "create-account", account_type="standard"
+    )
     accounts_list_url = app.url_path_for("accounts-list")
     return f"""
     <html>
@@ -19,18 +21,31 @@ def read_root() -> str:
         </head>
         <body>
             <h1>Stripe Connect Demo</h1>
-            <a target="_blank" href="https://www.w3schools.com/">Visit W3Schools.com!</a></br>
-            <a target="_blank" href="{create_account_url}">Create Stripe Account</a></br>
-            <a target="_blank" href="{accounts_list_url}">Stripe Accounts List</a></br>
+            <a target="_blank" href="{create_standard_account_url}">Create Standard Account</a></br></br>
+            <a target="_blank" href="{accounts_list_url}">Stripe Accounts List</a></br></br>
         </body>
     </html>
     """
 
 
-@app.get("/stripe/create-account", name="create-account")
-def create_account() -> dict:
-    response = stripe.Account.create(type="standard")
-    return {"create-account-response": response}
+@app.get(
+    "/stripe/create-account/{account_type}",
+    name="create-account",
+    response_class=RedirectResponse,
+)
+def create_account(account_type: str) -> str:
+    account = stripe.Account.create(type=account_type)
+    return app.url_path_for("account-detail", account_id=account["id"])
+
+
+@app.get(
+    "/stripe/delete-account/{account_id}",
+    name="delete-account",
+    response_class=RedirectResponse,
+)
+def delete_account(account_id: str) -> str:
+    stripe.Account.delete(account_id)
+    return app.url_path_for("accounts-list")
 
 
 @app.get(
@@ -40,7 +55,6 @@ def create_account() -> dict:
 )
 def create_account_link(request: Request, account_id: str, link_type: str) -> str:
     index_page_url = request.url_for("index-page")
-    print(index_page_url)
     response = stripe.AccountLink.create(
         account=account_id,
         refresh_url=index_page_url,
@@ -84,6 +98,7 @@ def account_detail(account_id: str) -> str:
         link_type="account_onboarding",
     )
     checkout_page_url = app.url_path_for("checkout-page", account_id=id)
+    delete_account_url = app.url_path_for("delete-account", account_id=id)
     return f"""
     <html>
         <head>
@@ -94,6 +109,7 @@ def account_detail(account_id: str) -> str:
             <p>Email: {email}</p>
             <p>Country: {country}</p>
             <a target="_blank" href="{onboarding_url}">Onboarding Link</a></br>
+            </br><a target="_blank" href="{delete_account_url}">DELETE</a></br>
 
             <p>
                 <form action="{checkout_page_url}" method="POST">
@@ -109,10 +125,11 @@ def account_detail(account_id: str) -> str:
     "/stripe/create-checkout-session/{account_id}",
     name="checkout-page",
     response_class=RedirectResponse,
+    status_code=303,
 )
 def checkout_page(account_id: str) -> str:
     session = stripe.checkout.Session.create(
-        payment_method_types=["card"],
+        # payment_method_types=["card"],
         line_items=[
             {
                 "name": "Stainless Steel Water Bottle",
