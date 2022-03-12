@@ -1,8 +1,3 @@
-from curses.ascii import HT
-from typing import Optional
-from unicodedata import name
-from urllib import response
-
 import stripe
 
 from fastapi import FastAPI, Request
@@ -17,16 +12,6 @@ stripe.api_key = "sk_test_51KbRgOEsCAzyWueJREvb2cu4pVmHJ2m0JXNtpm8m4IxkOfcX18wOm
 def read_root() -> str:
     create_account_url = app.url_path_for("create-account")
     accounts_list_url = app.url_path_for("accounts-list")
-    account_onboarding_link_url = app.url_path_for(
-        "create-account-link",
-        account_id="acct_1KcAHQRL5naFd30j",
-        link_type="account_onboarding",
-    )
-    account_update_link_url = app.url_path_for(
-        "create-account-link",
-        account_id="acct_1KcAHQRL5naFd30j",
-        link_type="account_update",
-    )
     return f"""
     <html>
         <head>
@@ -36,8 +21,6 @@ def read_root() -> str:
             <h1>Stripe Connect Demo</h1>
             <a target="_blank" href="https://www.w3schools.com/">Visit W3Schools.com!</a></br>
             <a target="_blank" href="{create_account_url}">Create Stripe Account</a></br>
-            <a target="_blank" href="{account_onboarding_link_url}">Stripe Account Onboarding Link</a></br>
-            <a target="_blank" href="{account_update_link_url}">Stripe Account Update Link</a></br>
             <a target="_blank" href="{accounts_list_url}">Stripe Accounts List</a></br>
         </body>
     </html>
