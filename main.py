@@ -21,8 +21,8 @@ def index() -> str:
         </head>
         <body>
             <h1>Stripe Connect Demo</h1>
-            <a target="_blank" href="{create_standard_account_url}">Create Standard Account</a></br></br>
-            <a target="_blank" href="{accounts_list_url}">Stripe Accounts List</a></br></br>
+            <a target="_blank" href="{create_standard_account_url}">Create Standard Connected Stripe Account</a></br></br>
+            <a target="_blank" href="{accounts_list_url}">Connected Stripe Accounts List</a></br></br>
         </body>
     </html>
     """
@@ -108,12 +108,12 @@ def account_detail(account_id: str) -> str:
             <p>ID: {id}</p>
             <p>Email: {email}</p>
             <p>Country: {country}</p>
-            <a target="_blank" href="{onboarding_url}">Onboarding Link</a></br>
+            <a target="_blank" href="{onboarding_url}">Onboarding Link (Required before you can go to checkout page)</a></br>
             </br><a target="_blank" href="{delete_account_url}">DELETE</a></br>
 
             <p>
                 <form action="{checkout_page_url}" method="POST">
-                <button type="submit">Checkout</button>
+                <button type="submit">Open Checkout Page</button>
                 </form>
             </p>
         </body>
@@ -129,7 +129,6 @@ def account_detail(account_id: str) -> str:
 )
 def checkout_page(account_id: str) -> str:
     session = stripe.checkout.Session.create(
-        # payment_method_types=["card"],
         line_items=[
             {
                 "name": "Stainless Steel Water Bottle",
